@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import type { Organization } from "@/lib/supabase"
 
 interface Team {
   name: string
@@ -103,9 +104,9 @@ export function TeamSwitcher({ teams, onTeamChange }: TeamSwitcherProps) {
       const newOrg = await createOrganization({
         name: formData.name.trim(),
         slug: formData.slug.trim(),
-        description: formData.description.trim() || null,
+        description: formData.description.trim() || undefined,
         settings: { visibility: "private", allow_member_invites: false },
-      })
+      } as Omit<Organization, "id" | "created_at" | "updated_at">)
 
       if (newOrg) {
         toast({

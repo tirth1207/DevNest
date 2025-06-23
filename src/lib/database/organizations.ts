@@ -35,7 +35,7 @@ export class OrganizationsService {
 
       // Combine and deduplicate
       const allOrgs = [...(ownedOrgs || [])]
-      const memberOrgData = memberOrgs?.map((m) => m.organization).filter(Boolean) || []
+      const memberOrgData = memberOrgs?.map((m) => (m as any).organization as Organization).filter(Boolean) || []
 
       memberOrgData.forEach((org) => {
         if (!allOrgs.find((existing) => existing.id === org.id)) {
@@ -295,7 +295,7 @@ export class OrganizationsService {
       // This method doesn't require authentication - for public invite pages
       const { data: org, error: orgError } = await supabase
         .from("organizations")
-        .select("id, name, slug, description, avatar_url, created_at")
+        .select("id, name, slug, description, avatar_url, created_at, owner_id")
         .eq("slug", slug)
         .single()
 
