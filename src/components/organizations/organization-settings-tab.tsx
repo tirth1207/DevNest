@@ -72,10 +72,6 @@ export function OrganizationSettingsTab({ organization, onUpdate, userRole }: Or
       newErrors.name = "Organization name must be at least 2 characters"
     }
 
-    if (formData.website && !formData.website.match(/^https?:\/\/.+/)) {
-      newErrors.website = "Website must be a valid URL starting with http:// or https://"
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
