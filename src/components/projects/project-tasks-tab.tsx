@@ -409,7 +409,7 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                     <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-3 w-3" />
-                        <span>Created {new Date(task.created_at).toLocaleDateString()}</span>
+                        <span>Created {task.created_at ? new Date(task.created_at).toLocaleDateString() : 'N/A'}</span>
                       </div>
                       {task.assignee && (
                         <div className="flex items-center space-x-1">
