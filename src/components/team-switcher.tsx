@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import type { Organization } from "@/lib/supabase"
+import { getMainUrl } from "@/lib/utils"
 
 interface Team {
   name: string
@@ -116,7 +117,7 @@ export function TeamSwitcher({ teams, onTeamChange }: TeamSwitcherProps) {
         setIsCreateDialogOpen(false)
         setFormData({ name: "", slug: "", description: "" })
         // Refresh the page or redirect to the new organization
-        window.location.href = `/dashboard/organizations/${newOrg.slug}`
+        window.location.href = `${getMainUrl()}/dashboard/organizations/${newOrg.slug}`
       } else {
         throw new Error("Failed to create organization")
       }

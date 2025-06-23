@@ -19,6 +19,7 @@ import { toast } from "@/hooks/use-toast"
 import { Trash2, AlertTriangle, Copy, Check, Link as LinkIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { Project, ProjectMember } from "@/lib/supabase"
+import { getMainUrl } from "@/lib/utils"
 
 interface ProjectSettingsTabProps {
   project: Project
@@ -73,7 +74,7 @@ export function ProjectSettingsTab({ project, userRole, members, currentUserId }
   }
 
   const copyInviteLink = async () => {
-    const inviteLink = `${window.location.origin}/invite/project/${project.id}`
+    const inviteLink = `${getMainUrl()}/invite/project/${project.id}`
     await navigator.clipboard.writeText(inviteLink)
     setCopied(true)
     toast({

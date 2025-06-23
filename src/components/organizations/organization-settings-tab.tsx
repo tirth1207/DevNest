@@ -40,6 +40,7 @@ import {
 import { OrganizationsService } from "@/lib/database/organizations"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { getMainUrl } from "@/lib/utils"
 
 interface OrganizationSettingsTabProps {
   organization: Organization
@@ -137,7 +138,7 @@ export function OrganizationSettingsTab({ organization, onUpdate, userRole }: Or
   }
 
   const copyInviteLink = async () => {
-    const inviteLink = `${window.location.origin}/invite/organization/${organization.slug}`
+    const inviteLink = `${getMainUrl()}/invite/organization/${organization.slug}`
     await navigator.clipboard.writeText(inviteLink)
     setCopied(true)
     toast({
