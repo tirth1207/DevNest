@@ -28,12 +28,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ProfilesService } from "@/lib/database/profiles"
 
-export async function fetchUserRepos(username: string) {
-  const res = await fetch(`/api/github/user-repos?username=${username}`)
-  if (!res.ok) throw new Error("Failed to fetch repos")
-  return res.json()
-}
-
 export default function ProjectsPage() {
   const router = useRouter()
   const { projects, loading, error, createProject, deleteProject, refetch } = useProjects()
@@ -180,6 +174,11 @@ export default function ProjectsPage() {
       setUserProfile(profile)
       if (profile?.github_username) {
         setReposLoading(true)
+        const fetchUserRepos = async (username: string) => {
+          const res = await fetch(`/api/github/user-repos?username=${username}`)
+          if (!res.ok) throw new Error("Failed to fetch repos")
+          return res.json()
+        }
         fetchUserRepos(profile.github_username)
           .then((repos) => {
             setUserRepos(repos)
