@@ -27,7 +27,12 @@ import {
   Activity,
   CreditCard,
   Users,
+  GitBranch,
+  CheckCircle,
+  Clock,
+  Plus,
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function Page() {
   const {
@@ -43,170 +48,154 @@ export default function Page() {
     loading: tasksLoading,
   } = useUserTasks()
 
+  // Calculate stats
+  const activeProjects = projects?.filter((p) => p.status === "active").length || 0
+  // Team members: count unique user IDs across all projects (mocked as 1 for now)
+  const teamMembers = 1
+  const completedTasks = tasks?.filter((t) => t.status === "closed").length || 0
+  const pendingTasks = tasks?.filter((t) => t.status === "open" || t.status === "in_progress").length || 0
+
   return (
     <SidebarInset>
       <div className="flex-1 min-h-screen bg-gradient-to-br from-white to-blue-50 space-y-6 p-4 pt-10 md:p-12">
-        <div className="mb-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-primary mb-2">
-            Hi, Welcome Back <span className="inline-block animate-wave">👋</span>
-          </h2>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Here's a quick overview of your organizations, projects, and tasks. Stay productive and keep building amazing things!
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+              {"Welcome back! Here's what's happening with your projects."}
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/dashboard/projects/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Project
+            </Link>
+          </Button>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Organizations
-              </CardTitle>
-              <Users className="h-5 w-5 text-indigo-600" />
+              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+              <GitBranch className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {orgsLoading ? (
-                <Skeleton className="h-8 w-1/4" />
-              ) : (
-                <div className="text-3xl font-bold text-primary">{organizations.length}</div>
-              )}
+              {projectsLoading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{activeProjects}</div>}
+              <p className="text-xs text-muted-foreground">Projects in progress</p>
             </CardContent>
           </Card>
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Projects</CardTitle>
-              <CreditCard className="h-5 w-5 text-indigo-600" />
+              <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {projectsLoading ? (
-                <Skeleton className="h-8 w-1/4" />
-              ) : (
-                <div className="text-3xl font-bold text-primary">{projects.length}</div>
-              )}
+              <div className="text-2xl font-bold">{teamMembers}</div>
+              <p className="text-xs text-muted-foreground">Across all projects</p>
             </CardContent>
           </Card>
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Tasks
-              </CardTitle>
-              <Activity className="h-5 w-5 text-indigo-600" />
+              <CardTitle className="text-sm font-medium">Completed Tasks</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {tasksLoading ? (
-                <Skeleton className="h-8 w-1/4" />
-              ) : (
-                <div className="text-3xl font-bold text-primary">{tasks.length}</div>
-              )}
+              {tasksLoading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{completedTasks}</div>}
+              <p className="text-xs text-muted-foreground">Tasks you've completed</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {tasksLoading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-2xl font-bold">{pendingTasks}</div>}
+              <p className="text-xs text-muted-foreground">Tasks assigned to you</p>
             </CardContent>
           </Card>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-1 lg:col-span-4 shadow-md hover:shadow-lg transition-shadow">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Recent Projects</CardTitle>
-              <CardDescription>
-                You have {projects.length} projects.
-              </CardDescription>
+              <CardDescription>Your most recently updated projects</CardDescription>
             </CardHeader>
             <CardContent>
-              {projectsLoading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Organization</TableHead>
-                      <TableHead>Due Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {projects.slice(0, 5).map((project) => (
-                      <TableRow key={project.id} className="hover:bg-primary/10 transition-colors">
-                        <TableCell>
-                          <Link
-                            href={`/dashboard/projects/${project.id}`}
-                            className="font-medium hover:text-primary hover:underline text-primary"
-                          >
-                            {project.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <Badge>{project.status || "N/A"}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Link href={`/dashboard/organizations/${project.organization?.slug}`} className="hover:text-primary hover:underline">
-                            {project.organization?.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          {"due_date" in project && project.due_date
-                            ? new Date((project as any).due_date).toLocaleDateString()
-                            : "N/A"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-          <Card className="col-span-1 lg:col-span-3 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle>My Tasks</CardTitle>
-              <CardDescription>
-                You have {tasks.length} active tasks assigned to you.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {tasksLoading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {tasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="flex items-center justify-between hover:bg-primary/10 rounded-lg px-2 py-2 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="hidden h-9 w-9 sm:flex">
-                          <AvatarImage
-                            src={task.assignee?.avatar_url || ""}
-                            alt="Avatar"
-                          />
-                          <AvatarFallback>
-                            {task.assignee?.full_name?.[0] || "?"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium leading-none">
-                            <Link
-                              href={`/dashboard/projects/${task.project.id}/tasks/${task.number}`}
-                              className="hover:text-primary hover:underline text-primary"
-                            >
-                              {task.title}
-                            </Link>
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {task.project.name}
-                          </p>
-                        </div>
+              <div className="space-y-4">
+                {projectsLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                ) : projects && projects.length > 0 ? (
+                  projects.slice(0, 5).map((project) => (
+                    <div key={project.id} className="flex items-center space-x-4">
+                      <div className="flex-1 space-y-1">
+                        <Link
+                          href={`/dashboard/projects/${project.id}`}
+                          className="text-sm font-medium leading-none hover:underline"
+                        >
+                          {project.name}
+                        </Link>
+                        <p className="text-sm text-muted-foreground">{project.description}</p>
                       </div>
-                      <div>
-                        <Badge variant="outline">{task.status}</Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={project.status === "active" ? "default" : "secondary"}>{project.status}</Badge>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No projects yet</p>
+                    <Button asChild className="mt-2">
+                      <Link href="/dashboard/projects/new">Create your first project</Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Recent Tasks</CardTitle>
+              <CardDescription>Your latest task updates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {tasksLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                ) : tasks && tasks.length > 0 ? (
+                  tasks.slice(0, 5).map((task) => (
+                    <div key={task.id} className="flex items-start space-x-3">
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium leading-none">{task.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {task.project?.name} • {task.status?.replace("_", " ")}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          task.priority === "critical"
+                            ? "destructive"
+                            : task.priority === "high"
+                            ? "default"
+                            : "secondary"
+                        }
+                        className="text-xs"
+                      >
+                        {task.priority}
+                      </Badge>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No tasks yet</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>

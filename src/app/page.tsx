@@ -4,13 +4,12 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { Github, Users, FolderOpen, CheckCircle } from "lucide-react";
-import { getMainUrl } from "@/lib/utils";
 
 async function signInWithGithub() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      redirectTo: `${getMainUrl()}/dashboard`,
+      redirectTo: `/dashboard`,
     },
   })
 }
