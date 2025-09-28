@@ -9,7 +9,7 @@ async function signInWithGithub() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
-      redirectTo: `/dashboard`,
+      redirectTo: `https://dev-nest-6t4w.vercel.app/dashboard`,
     },
   })
 }
