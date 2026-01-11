@@ -81,12 +81,12 @@ export interface Task {
   type: "task" | "bug" | "feature" | "epic"
   assignee_id?: string
   reporter_id: string
-  due_date?: string
-  estimated_hours?: number
-  actual_hours?: number
-  labels?: string[]
-  metadata?: any
-  closed_at?: string
+  due_date?: string | null
+  estimated_hours?: number | null
+  actual_hours?: number | null
+  labels?: string[] | null
+  metadata?: any | null
+  closed_at?: string | null
 }
 
 export interface TaskWithRelations extends Task {

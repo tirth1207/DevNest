@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useProjectMembers } from "@/hooks/use-project-members"
 import { ProjectsService } from "@/lib/database/projects"
@@ -23,7 +22,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "@/hooks/use-toast"
-import { Plus, MoreHorizontal, Mail, UserX, Shield, Edit } from "lucide-react"
+import { Plus, MoreHorizontal, Mail, UserCheck, Shield } from "lucide-react"
 import type { ProjectMember } from "@/lib/supabase"
 
 interface ProjectMembersTabProps {
@@ -34,7 +33,13 @@ interface ProjectMembersTabProps {
   currentUserId: string | null
 }
 
-export function ProjectMembersTab({ projectId, userRole, organizationId, projectOwnerId, currentUserId }: ProjectMembersTabProps) {
+export function ProjectMembersTab({
+  projectId,
+  userRole,
+  organizationId,
+  projectOwnerId,
+  currentUserId,
+}: ProjectMembersTabProps) {
   const { members, loading, refetch } = useProjectMembers(projectId)
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [isInviting, setIsInviting] = useState(false)
@@ -43,8 +48,7 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
     role: "read" as ProjectMember["role"],
   })
 
-  // Allow the project owner to manage all members, including themselves
-  const canManageMembers = (userRole === "owner") || (userRole === "admin") || (projectOwnerId === currentUserId)
+  const canManageMembers = userRole === "owner" || userRole === "admin" || projectOwnerId === currentUserId
 
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,7 +64,6 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
 
     setIsInviting(true)
     try {
-      // TODO: Implement project invitation logic if needed
       toast({
         title: "Not implemented",
         description: "Project invitations are not implemented yet.",
@@ -102,13 +105,13 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
   const getRoleColor = (role: string) => {
     switch (role) {
       case "admin":
-        return "bg-red-100 text-red-800"
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
       case "write":
-        return "bg-blue-100 text-blue-800"
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
       case "read":
-        return "bg-gray-100 text-gray-800"
+        return "bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200"
     }
   }
 
@@ -123,7 +126,7 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
 
   if (loading) {
     return (
-      <Card>
+      <Card className="border-border/50 shadow-sm">
         <CardHeader>
           <CardTitle>Team Members</CardTitle>
         </CardHeader>
@@ -131,14 +134,14 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="space-y-1">
-                    <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-muted rounded-full animate-pulse" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+                    <div className="h-3 w-24 bg-muted rounded animate-pulse" />
                   </div>
                 </div>
-                <div className="h-6 w-16 bg-gray-200 rounded animate-pulse" />
+                <div className="h-6 w-16 bg-muted rounded animate-pulse" />
               </div>
             ))}
           </div>
@@ -149,19 +152,22 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-border/50 shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Team Members</CardTitle>
-              <CardDescription>Manage who has access to this project and their permissions</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5" />
+                Team Members
+              </CardTitle>
+              <CardDescription>Manage who has access to this project</CardDescription>
             </div>
             {canManageMembers && (
               <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button size="sm">
                     <Plus className="mr-2 h-4 w-4" />
-                    Invite Member
+                    Invite
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -178,7 +184,7 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
                           type="email"
                           value={inviteData.email}
                           onChange={(e) => setInviteData((prev) => ({ ...prev, email: e.target.value }))}
-                          placeholder="Enter email address"
+                          placeholder="name@example.com"
                           required
                         />
                       </div>
@@ -194,9 +200,9 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="read">Read</SelectItem>
-                            <SelectItem value="write">Write</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="read">Read - View only</SelectItem>
+                            <SelectItem value="write">Write - Can edit</SelectItem>
+                            <SelectItem value="admin">Admin - Full access</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -217,28 +223,31 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {members.map((member) => (
-              <div key={member.id} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+              <div
+                key={member.id}
+                className="flex items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-center gap-3 flex-1">
                   <Avatar>
                     <AvatarImage src={member.profile.avatar_url || undefined} />
                     <AvatarFallback>
                       {member.profile.full_name?.charAt(0) || member.profile.email?.charAt(0) || "?"}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <p className="font-medium">{member.profile.full_name || member.profile.email}</p>
-                      {member.profile.github_username && (
-                        <span className="text-sm text-muted-foreground">@{member.profile.github_username}</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{member.profile.email}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">{member.profile.full_name || member.profile.email}</p>
+                    {member.profile.github_username && (
+                      <p className="text-xs text-muted-foreground">@{member.profile.github_username}</p>
+                    )}
+                    {!member.profile.github_username && (
+                      <p className="text-xs text-muted-foreground">{member.profile.email}</p>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={getRoleColor(member.role)}>
+                <div className="flex items-center gap-2">
+                  <Badge className={`${getRoleColor(member.role)} text-xs`}>
                     {getRoleIcon(member.role)}
                     <span className="ml-1">{member.role}</span>
                   </Badge>
@@ -250,16 +259,13 @@ export function ProjectMembersTab({ projectId, userRole, organizationId, project
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleUpdateRole(member.id, "read")}> 
-                          <Edit className="mr-2 h-4 w-4" />
+                        <DropdownMenuItem onClick={() => handleUpdateRole(member.id, "read")}>
                           Make Read
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleUpdateRole(member.id, "write")}> 
-                          <Edit className="mr-2 h-4 w-4" />
+                        <DropdownMenuItem onClick={() => handleUpdateRole(member.id, "write")}>
                           Make Write
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleUpdateRole(member.id, "admin")}> 
-                          <Edit className="mr-2 h-4 w-4" />
+                        <DropdownMenuItem onClick={() => handleUpdateRole(member.id, "admin")}>
                           Make Admin
                         </DropdownMenuItem>
                       </DropdownMenuContent>

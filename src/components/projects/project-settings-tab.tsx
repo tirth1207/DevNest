@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
-import { Trash2, AlertTriangle, Copy, Check, Link as LinkIcon } from "lucide-react"
+import { Trash2, AlertTriangle, Copy, Check, LinkIcon, Shield } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { Project, ProjectMember } from "@/lib/supabase"
 import { getMainUrl } from "@/lib/utils"
@@ -39,7 +39,6 @@ export function ProjectSettingsTab({ project, userRole, members, currentUserId }
   const isOwner = currentUserId && project.owner_id === currentUserId
   const isAdmin = userMember && userMember.role === "admin"
   const canEdit = !!(isOwner || isAdmin)
-  const canInvite = canEdit
   const canDelete = isOwner
 
   const handleDeleteProject = async () => {
@@ -78,66 +77,65 @@ export function ProjectSettingsTab({ project, userRole, members, currentUserId }
     await navigator.clipboard.writeText(inviteLink)
     setCopied(true)
     toast({
-      title: "Link copied",
-      description: "Project invite link copied to clipboard.",
+      title: "Copied",
+      description: "Invite link copied to clipboard.",
     })
     setTimeout(() => setCopied(false), 2000)
   }
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-border/50 shadow-sm">
         <CardHeader>
-          <CardTitle>Project Information</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Project Information
+          </CardTitle>
           <CardDescription>Basic information about this project</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label className="text-sm font-medium text-muted-foreground">Project ID</Label>
-              <p className="text-sm font-mono bg-muted px-2 py-1 rounded">{project.id}</p>
+              <p className="text-sm font-mono bg-muted px-3 py-2 rounded mt-1">{project.id}</p>
             </div>
             <div>
               <Label className="text-sm font-medium text-muted-foreground">Created</Label>
-              <p className="text-sm">{project.created_at ? new Date(project.created_at).toLocaleString() : "N/A"}</p>
+              <p className="text-sm mt-1">
+                {project.created_at ? new Date(project.created_at).toLocaleString() : "N/A"}
+              </p>
             </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label className="text-sm font-medium text-muted-foreground">Last Updated</Label>
-              <p className="text-sm">{project.updated_at ? new Date(project.updated_at).toLocaleString() : "N/A"}</p>
+              <p className="text-sm mt-1">
+                {project.updated_at ? new Date(project.updated_at).toLocaleString() : "N/A"}
+              </p>
             </div>
             <div>
               <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-              <p className="text-sm capitalize">{project.status}</p>
+              <p className="text-sm capitalize mt-1">{project.status}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {canInvite && (
-        <Card>
+      {canEdit && (
+        <Card className="border-border/50 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <LinkIcon className="mr-2 h-5 w-5" />
-              Project Invite Link
+            <CardTitle className="flex items-center gap-2">
+              <LinkIcon className="h-5 w-5" />
+              Invite Members
             </CardTitle>
             <CardDescription>Share this link to invite people to your project</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="space-y-1">
-                <div className="flex items-center">
-                  <LinkIcon className="mr-2 h-4 w-4" />
-                  <span className="font-medium">Project Invite Link</span>
-                </div>
-                <p className="text-sm text-muted-foreground">Share this link to invite people to your project</p>
-                <code className="text-xs bg-muted px-2 py-1 rounded">
-                  {typeof window !== "undefined" ? window.location.origin : ""}/invite/project/{project.id}
-                </code>
-              </div>
-              <Button onClick={copyInviteLink} variant="outline" size="sm">
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            <div className="flex items-center gap-2 p-4 border border-border/50 rounded-lg bg-muted/20">
+              <LinkIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <code className="text-xs bg-background px-2 py-1 rounded flex-1 break-all font-mono text-muted-foreground">
+                {typeof window !== "undefined" ? window.location.origin : ""}/invite/project/{project.id}
+              </code>
+              <Button onClick={copyInviteLink} variant="ghost" size="sm" className="flex-shrink-0">
+                {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
           </CardContent>
@@ -145,10 +143,10 @@ export function ProjectSettingsTab({ project, userRole, members, currentUserId }
       )}
 
       {canDelete && (
-        <Card className="border-red-200">
+        <Card className="border-destructive/50 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-red-600 flex items-center">
-              <AlertTriangle className="mr-2 h-5 w-5" />
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
               Danger Zone
             </CardTitle>
             <CardDescription>Irreversible and destructive actions</CardDescription>
@@ -158,12 +156,12 @@ export function ProjectSettingsTab({ project, userRole, members, currentUserId }
               <div>
                 <h4 className="font-medium text-sm mb-2">Delete Project</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Once you delete a project, there is no going back. Please be certain. This will permanently delete the
-                  project, all its tasks, and remove all team member associations.
+                  This action cannot be undone. This will permanently delete the project, all its tasks, and remove all
+                  team member associations.
                 </p>
                 <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="destructive">
+                    <Button variant="destructive" size="sm">
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete Project
                     </Button>
@@ -178,12 +176,12 @@ export function ProjectSettingsTab({ project, userRole, members, currentUserId }
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                        <div className="flex items-start space-x-3">
-                          <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
                           <div className="text-sm">
-                            <p className="font-medium text-red-800 mb-1">This will permanently delete:</p>
-                            <ul className="text-red-700 space-y-1">
+                            <p className="font-medium text-destructive mb-1">This will permanently delete:</p>
+                            <ul className="text-destructive/80 space-y-1">
                               <li>• All project tasks and data</li>
                               <li>• All team member associations</li>
                               <li>• All project invitations</li>

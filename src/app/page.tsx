@@ -12,6 +12,8 @@ async function signInWithGithub() {
       redirectTo: `localhost:3000/dashboard`,
     },
   })
+  console.log(data);
+  console.log(error);
 }
 
 export default function Home() {

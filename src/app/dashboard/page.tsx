@@ -238,76 +238,76 @@ export default function Page() {
 
         {/* Stats Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/50 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-blue-50/50 dark:to-blue-900/20 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Active Projects</CardTitle>
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <GitBranch className="h-4 w-4 text-blue-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Projects</CardTitle>
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                <GitBranch className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
             </CardHeader>
             <CardContent>
               {projectsLoading ? (
                 <Skeleton className="h-8 w-1/4" />
               ) : (
-                <div className="text-3xl font-bold text-slate-900">{activeProjects}</div>
+                <div className="text-3xl font-bold text-foreground">{activeProjects}</div>
               )}
-              <p className="text-xs text-slate-500 mt-1 flex items-center">
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 Projects in progress
               </p>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-green-50/50 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-green-50/50 dark:to-green-900/20 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Team Members</CardTitle>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Users className="h-4 w-4 text-green-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Team Members</CardTitle>
+              <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
+                <Users className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{teamMembers}</div>
-              <p className="text-xs text-slate-500 mt-1 flex items-center">
+              <div className="text-3xl font-bold text-foreground">{teamMembers}</div>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
                 <Star className="h-3 w-3 mr-1" />
                 Across all projects
               </p>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-emerald-50/50 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-emerald-50/50 dark:to-emerald-900/20 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Completed Tasks</CardTitle>
-              <div className="p-2 bg-emerald-100 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Completed Tasks</CardTitle>
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
             </CardHeader>
             <CardContent>
               {tasksLoading ? (
                 <Skeleton className="h-8 w-1/4" />
               ) : (
-                <div className="text-3xl font-bold text-slate-900">{completedTasks}</div>
+                <div className="text-3xl font-bold text-foreground">{completedTasks}</div>
               )}
-              <p className="text-xs text-slate-500 mt-1 flex items-center">
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
                 <Zap className="h-3 w-3 mr-1" />
                 Tasks completed
               </p>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-orange-50/50 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-orange-50/50 dark:to-orange-900/20 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Pending Tasks</CardTitle>
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Clock className="h-4 w-4 text-orange-600" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Tasks</CardTitle>
+              <div className="p-2 bg-orange-100 dark:bg-orange-900/50 rounded-lg">
+                <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               </div>
             </CardHeader>
             <CardContent>
               {tasksLoading ? (
                 <Skeleton className="h-8 w-1/4" />
               ) : (
-                <div className="text-3xl font-bold text-slate-900">{pendingTasks}</div>
+                <div className="text-3xl font-bold text-foreground">{pendingTasks}</div>
               )}
-              <p className="text-xs text-slate-500 mt-1 flex items-center">
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
                 <Activity className="h-3 w-3 mr-1" />
                 Tasks assigned to you
               </p>
@@ -315,10 +315,9 @@ export default function Page() {
           </Card>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Recent Projects */}
-          <Card className="lg:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="lg:col-span-2 border-0 shadow-lg bg-card/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -349,7 +348,7 @@ export default function Page() {
                   projects.slice(0, 5).map((project) => (
                     <div
                       key={project.id}
-                      className="group p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-white/50"
+                      className="group p-4 rounded-xl border border-border hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all duration-200 bg-card/50"
                     >
                       <div className="flex items-center space-x-4">
                         <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white">
@@ -358,14 +357,14 @@ export default function Page() {
                         <div className="flex-1 space-y-1">
                           <Link
                             href={`/dashboard/projects/${project.id}`}
-                            className="text-lg font-semibold text-slate-900 hover:text-blue-600 transition-colors group-hover:text-blue-600"
+                            className="text-lg font-semibold text-foreground hover:text-blue-600 transition-colors group-hover:text-blue-600"
                           >
                             {project.name}
                           </Link>
-                          <p className="text-sm text-slate-500 line-clamp-1">
+                          <p className="text-sm text-muted-foreground line-clamp-1">
                             {project.description || "No description"}
                           </p>
-                          <div className="flex items-center space-x-2 text-xs text-slate-400">
+                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                             <Calendar className="h-3 w-3" />
                             <span>
                               Updated{" "}
@@ -388,10 +387,10 @@ export default function Page() {
                   ))
                 ) : (
                   <div className="text-center py-12">
-                    <div className="p-4 bg-slate-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                      <GitBranch className="h-8 w-8 text-slate-400" />
+                    <div className="p-4 bg-muted rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                      <GitBranch className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <p className="text-slate-500 mb-4">No projects yet</p>
+                    <p className="text-muted-foreground mb-4">No projects yet</p>
                     <Button asChild>
                       <Link href="/dashboard/projects/new">Create your first project</Link>
                     </Button>
@@ -402,7 +401,7 @@ export default function Page() {
           </Card>
 
           {/* Recent Tasks */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="border-0 shadow-lg bg-card/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl font-semibold">Recent Tasks</CardTitle>
               <CardDescription>Your latest task updates</CardDescription>
@@ -425,39 +424,37 @@ export default function Page() {
                   tasks.slice(0, 6).map((task) => (
                     <div
                       key={task.id}
-                      className="group p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all duration-200"
+                      className="group p-3 rounded-lg border border-border hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/30 dark:hover:bg-blue-900/20 transition-all duration-200"
                     >
                       <div className="flex items-start space-x-3">
                         <div
-                          className={`p-1.5 rounded-lg ${
-                            task.status === "closed"
-                              ? "bg-green-100"
-                              : task.status === "in_progress"
-                                ? "bg-yellow-100"
-                                : "bg-blue-100"
-                          }`}
+                          className={`p-1.5 rounded-lg ${task.status === "closed"
+                            ? "bg-green-100"
+                            : task.status === "in_progress"
+                              ? "bg-yellow-100"
+                              : "bg-blue-100 dark:bg-blue-900/50"
+                            }`}
                         >
                           {task.status === "closed" ? (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                           ) : task.status === "in_progress" ? (
-                            <Clock className="h-4 w-4 text-yellow-600" />
+                            <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                           ) : (
-                            <Activity className="h-4 w-4 text-blue-600" />
+                            <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                           )}
                         </div>
                         <div className="flex-1 space-y-1">
-                          <p className="text-sm font-medium text-slate-900 line-clamp-1">{task.title}</p>
+                          <p className="text-sm font-medium text-foreground line-clamp-1">{task.title}</p>
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs text-slate-500">{task.project?.name}</span>
+                            <span className="text-xs text-muted-foreground">{task.project?.name}</span>
                             <Badge
                               variant="outline"
-                              className={`text-xs ${
-                                task.priority === "critical"
-                                  ? "border-red-200 text-red-700 bg-red-50"
-                                  : task.priority === "high"
-                                    ? "border-orange-200 text-orange-700 bg-orange-50"
-                                    : "border-slate-200 text-slate-600 bg-slate-50"
-                              }`}
+                              className={`text-xs ${task.priority === "critical"
+                                ? "border-red-200 text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
+                                : task.priority === "high"
+                                  ? "border-orange-200 text-orange-700 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800"
+                                  : "border-slate-200 text-slate-600 bg-slate-50 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700"
+                                }`}
                             >
                               {task.priority}
                             </Badge>
@@ -468,10 +465,10 @@ export default function Page() {
                   ))
                 ) : (
                   <div className="text-center py-8">
-                    <div className="p-3 bg-slate-100 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center">
-                      <CheckCircle className="h-6 w-6 text-slate-400" />
+                    <div className="p-3 bg-muted rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+                      <CheckCircle className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <p className="text-slate-500 text-sm">No tasks yet</p>
+                    <p className="text-muted-foreground text-sm">No tasks yet</p>
                   </div>
                 )}
               </div>
@@ -479,6 +476,6 @@ export default function Page() {
           </Card>
         </div>
       </div>
-    </SidebarInset>
+    </SidebarInset >
   )
 }
