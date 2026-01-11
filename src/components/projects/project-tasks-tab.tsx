@@ -70,6 +70,17 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
     estimated_hours: "",
   })
 
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    status: "open" as Task["status"],
+    priority: "medium" as Task["priority"],
+    type: "task" as Task["type"],
+    assignee_id: "unassigned",
+    due_date: "",
+    estimated_hours: "",
+  })
+
   const handleCreateTask = async () => {
     if (!newTask.title.trim()) {
       toast({ title: "Title is required", variant: "destructive" })
@@ -119,6 +130,49 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
       title: deleted ? "Task deleted" : "Failed to delete task",
       variant: deleted ? "default" : "destructive",
     })
+  }
+
+  const handleEditClick = (task: TaskWithRelations) => {
+    setEditingTask(task)
+    setEditForm({
+      title: task.title,
+      description: task.description || "",
+      status: task.status,
+      priority: task.priority,
+      type: task.type,
+      assignee_id: task.assignee_id || "unassigned",
+      due_date: task.due_date ? new Date(task.due_date).toISOString().split("T")[0] : "",
+      estimated_hours: task.estimated_hours ? String(task.estimated_hours) : "",
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const handleUpdateTask = async () => {
+    if (!editingTask) return
+    if (!editForm.title.trim()) {
+      toast({ title: "Title is required", variant: "destructive" })
+      return
+    }
+
+    const updates: any = {
+      title: editForm.title.trim(),
+      description: editForm.description || null,
+      status: editForm.status,
+      priority: editForm.priority,
+      type: editForm.type,
+      assignee_id: editForm.assignee_id === "unassigned" ? null : editForm.assignee_id,
+      due_date: editForm.due_date ? new Date(editForm.due_date).toISOString() : null,
+      estimated_hours: editForm.estimated_hours ? Number(editForm.estimated_hours) : null,
+    }
+
+    const updated = await updateTask(editingTask.id, updates)
+    if (updated) {
+      toast({ title: "Task updated successfully" })
+      setIsEditDialogOpen(false)
+      setEditingTask(null)
+    } else {
+      toast({ title: "Failed to update task", variant: "destructive" })
+    }
   }
 
   const getStatusIcon = (status: Task["status"]) => {
@@ -322,6 +376,125 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Edit Task</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-title">Title *</Label>
+                    <Input
+                      id="edit-title"
+                      value={editForm.title}
+                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                      placeholder="Task title"
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Textarea
+                      id="edit-description"
+                      value={editForm.description}
+                      onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                      placeholder="Add details..."
+                      rows={3}
+                      className="resize-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-type">Type</Label>
+                      <Select
+                        value={editForm.type}
+                        onValueChange={(value) => setEditForm({ ...editForm, type: value as Task["type"] })}
+                      >
+                        <SelectTrigger className="h-10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="task">Task</SelectItem>
+                          <SelectItem value="bug">Bug</SelectItem>
+                          <SelectItem value="feature">Feature</SelectItem>
+                          <SelectItem value="epic">Epic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-priority">Priority</Label>
+                      <Select
+                        value={editForm.priority}
+                        onValueChange={(value) => setEditForm({ ...editForm, priority: value as Task["priority"] })}
+                      >
+                        <SelectTrigger className="h-10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="critical">Critical</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-status">Status</Label>
+                    <Select
+                      value={editForm.status}
+                      onValueChange={(value) => setEditForm({ ...editForm, status: value as Task["status"] })}
+                    >
+                      <SelectTrigger className="h-10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
+                        <SelectItem value="blocked">Blocked</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-assignee">Assignee</Label>
+                    <Select
+                      value={editForm.assignee_id}
+                      onValueChange={(value) => setEditForm({ ...editForm, assignee_id: value })}
+                    >
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Unassigned" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {members.map((member) => (
+                          <SelectItem key={member.user_id} value={member.user_id}>
+                            {member.profile?.full_name || member.profile?.email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-due_date">Due Date</Label>
+                    <Input
+                      id="edit-due_date"
+                      type="date"
+                      value={editForm.due_date}
+                      onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateTask}>Save Changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
       </Card>
@@ -447,7 +620,10 @@ export function ProjectTasksTab({ projectId }: ProjectTasksTabProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleDeleteTask(task.id)}>Delete</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditClick(task)}>Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteTask(task.id)} className="text-red-500">
+                            Delete
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
