@@ -379,7 +379,7 @@ export function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
             </TabsContent>
 
             <TabsContent value="calander">
-              <div className="overflow-hidden">
+              <div className="">
                 <ProjectCalendarTab projectId={project.id} />
               </div>
             </TabsContent>
