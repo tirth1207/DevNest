@@ -1,10 +1,13 @@
+"use client"
+
 import Link from "next/link"
+import { Github, Twitter, Linkedin } from "lucide-react"
 
 export function Footer() {
     const currentYear = new Date().getFullYear()
 
     return (
-        <footer className="w-full border-t bg-card/50">
+        <footer className="w-full border-t bg-card/50 backdrop-blur-sm">
             <div className="max-w-6xl mx-auto px-6 py-16">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
                     {/* Product */}
@@ -103,11 +106,24 @@ export function Footer() {
 
                 {/* Bottom */}
                 <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">DN</span>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded flex items-center justify-center shadow-lg">
+                                <span className="text-white text-xs font-bold">DN</span>
+                            </div>
+                            <span className="text-sm font-semibold text-foreground">DevNest</span>
                         </div>
-                        <span className="text-sm font-semibold text-foreground">DevNest</span>
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                            <a href="#" className="hover:text-foreground transition-colors" aria-label="GitHub">
+                                <Github className="h-4 w-4" />
+                            </a>
+                            <a href="#" className="hover:text-foreground transition-colors" aria-label="Twitter">
+                                <Twitter className="h-4 w-4" />
+                            </a>
+                            <a href="#" className="hover:text-foreground transition-colors" aria-label="LinkedIn">
+                                <Linkedin className="h-4 w-4" />
+                            </a>
+                        </div>
                     </div>
                     <div className="text-sm text-muted-foreground">
                         © {currentYear} DevNest. All rights reserved.

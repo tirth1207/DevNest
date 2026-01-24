@@ -61,7 +61,8 @@ export function ProjectCalendarTab({ projectId }: ProjectCalendarTabProps) {
     const nextMonth = () => setCurrentDate(addDays(monthEnd, 1))
 
     const datedTasks = useMemo(() => {
-        return (tasks as TaskWithRelations[]).filter((t) => t.due_date)
+        if (!tasks || !Array.isArray(tasks)) return []
+        return (tasks as TaskWithRelations[]).filter((t) => t?.due_date)
     }, [tasks])
 
     if (loading) {
@@ -154,8 +155,9 @@ export function ProjectCalendarTab({ projectId }: ProjectCalendarTabProps) {
                                 </div>
                             ) : (
                                 datedTasks.map((task) => {
-                                    const dueDate = new Date(task.due_date!)
-                                    const createdAt = new Date(task.created_at!)
+                                    if (!task?.due_date || !task?.created_at) return null
+                                    const dueDate = new Date(task.due_date)
+                                    const createdAt = new Date(task.created_at)
 
                                     // Start of task for visualization: handle tasks starting before the current month view
                                     const displayStart = createdAt < monthStart ? monthStart : createdAt

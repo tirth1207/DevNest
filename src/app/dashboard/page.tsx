@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SidebarInset } from "@/components/ui/sidebar"
 import Link from "next/link"
-import { Activity, Users, GitBranch, CheckCircle, Clock, Plus, TrendingUp, Calendar, Star, Zap, Sparkles, Github } from "lucide-react"
+import { Activity, Users, GitBranch, CheckCircle, Clock, Plus, TrendingUp, Calendar, Star, Zap, Sparkles, Github, Building2, Globe, Lock, Eye, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useState, useEffect } from "react"
@@ -17,6 +17,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase"
+import { ProfilesService } from "@/lib/database/profiles"
 
 export default function Page() {
   const { organizations, loading: orgsLoading } = useOrganizations()
@@ -34,6 +36,10 @@ export default function Page() {
   })
   const [userProfile, setUserProfile] = useState<any>(null)
   const [repoMode, setRepoMode] = useState<"select" | "manual">("manual")
+  const [userRepos, setUserRepos] = useState<any[]>([])
+  const [reposLoading, setReposLoading] = useState(false)
+  const [repoError, setRepoError] = useState<string | null>(null)
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
   // Calculate stats
   const activeProjects = projects?.filter((p) => p.status === "active").length || 0
@@ -48,20 +54,68 @@ export default function Page() {
       .replace(/(^-|-$)/g, "")
   }
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const profile = await ProfilesService.getCurrentProfile()
+        setUserProfile(profile)
+        if (profile?.github_username) {
+          setReposLoading(true)
+          try {
+            const res = await fetch(`/api/github/user-repos?username=${profile.github_username}`)
+            if (res.ok) {
+              const repos = await res.json()
+              setUserRepos(repos)
+            } else {
+              setRepoError("Failed to fetch repositories")
+            }
+          } catch (error) {
+            setRepoError("Failed to fetch repositories")
+          } finally {
+            setReposLoading(false)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error)
+      }
+    }
+    fetchUserProfile()
+  }, [])
+
   const handleNameChange = (name: string) => {
     setFormData((prev) => ({
       ...prev,
       name,
       slug: generateSlug(name),
     }))
+    // Clear error when user starts typing
+    if (formErrors.name) {
+      setFormErrors((prev) => ({ ...prev, name: "" }))
+    }
+  }
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {}
+    if (!formData.name.trim()) {
+      errors.name = "Project name is required"
+    }
+    if (!formData.organization_id) {
+      errors.organization_id = "Organization is required"
+    }
+    if (formData.github_repo_link && !formData.github_repo_link.match(/^https:\/\/github\.com\/[\w\-\.]+\/[\w\-\.]+$/)) {
+      errors.github_repo_link = "Please enter a valid GitHub repository URL"
+    }
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name.trim() || !formData.organization_id) {
+    
+    if (!validateForm()) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: "Validation Error",
+        description: "Please fix the errors in the form",
         variant: "destructive",
       })
       return
@@ -92,6 +146,8 @@ export default function Page() {
           visibility: "private",
           github_repo_link: "",
         })
+        setFormErrors({})
+        setIsCreateDialogOpen(false)
         window.location.href = `/dashboard/projects/${newProject.id}`
       }
     } catch (error) {
@@ -106,62 +162,87 @@ export default function Page() {
   }
 
   return (
-    <SidebarInset>
-      <div className="flex-1 min-h-screen space-y-8">
-        {/* Header with gradient background */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white">
-          <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold mb-2">Welcome back! 👋</h1>
-                <p className="text-blue-100 text-lg">{"Here's what's happening with your projects today."}</p>
-              </div>
-              <div className="hidden md:flex items-center space-x-4">
-                <div className="text-right">
-                  <div className="text-2xl font-bold">{new Date().toLocaleDateString()}</div>
+    <div className="flex-1 space-y-8">
+      {/* Header with gradient background */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white shadow-xl">
+        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Welcome back! 👋</h1>
+              <p className="text-blue-100 text-lg">{"Here's what's happening with your projects today."}</p>
+            </div>
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="hidden md:flex items-center space-x-4 text-right">
+                <div>
+                  <div className="text-2xl font-bold">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
                   <div className="text-blue-200 text-sm">Today</div>
                 </div>
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-white/20 hover:bg-white/30 border-white/30">
-                      <Plus className="mr-2 h-4 w-4" />
-                      New Project
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <form onSubmit={handleCreateProject}>
-                      <DialogHeader>
-                        <DialogTitle className="flex items-center">
-                          <Sparkles className="mr-2 h-5 w-5 text-blue-600" />
+              </div>
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-white/20 hover:bg-white/30 border-white/30 backdrop-blur-sm shadow-lg">
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Project
+                  </Button>
+                </DialogTrigger>
+                  <DialogContent className="lg:max-w-5xl max-h-[90vh] overflow-y-auto">
+                    <form onSubmit={handleCreateProject} className="max-w-7xl">
+                      <DialogHeader className="space-y-3 pb-4 border-b">
+                        <DialogTitle className="flex items-center gap-3 text-2xl">
+                          <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg">
+                            <Sparkles className="h-5 w-5 text-white" />
+                          </div>
                           Create New Project
                         </DialogTitle>
-                        <DialogDescription>
-                          Create a new project to organize your work and collaborate with your team.
+                        <DialogDescription className="text-base">
+                          Set up a new project to organize your work, track progress, and collaborate with your team.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-6 py-6">
+                        {/* Organization & Visibility */}
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-2">
-                            <Label htmlFor="organization">Organization *</Label>
+                            <Label htmlFor="organization" className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4 text-muted-foreground" />
+                              Organization *
+                            </Label>
                             <Select
                               value={formData.organization_id}
-                              onValueChange={(value) => setFormData((prev) => ({ ...prev, organization_id: value }))}
+                              onValueChange={(value) => {
+                                setFormData((prev) => ({ ...prev, organization_id: value }))
+                                if (formErrors.organization_id) {
+                                  setFormErrors((prev) => ({ ...prev, organization_id: "" }))
+                                }
+                              }}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className={formErrors.organization_id ? "border-destructive" : ""}>
                                 <SelectValue placeholder="Select organization" />
                               </SelectTrigger>
                               <SelectContent>
-                                {organizations.map((org) => (
-                                  <SelectItem key={org.id} value={org.id}>
-                                    {org.name}
-                                  </SelectItem>
-                                ))}
+                                {organizations.length === 0 ? (
+                                  <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                    No organizations available
+                                  </div>
+                                ) : (
+                                  organizations.map((org) => (
+                                    <SelectItem key={org.id} value={org.id}>
+                                      {org.name}
+                                    </SelectItem>
+                                  ))
+                                )}
                               </SelectContent>
                             </Select>
+                            {formErrors.organization_id && (
+                              <p className="text-sm text-destructive">{formErrors.organization_id}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="visibility">Visibility</Label>
+                            <Label htmlFor="visibility" className="flex items-center gap-2">
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                              Visibility
+                            </Label>
                             <Select
                               value={formData.visibility}
                               onValueChange={(value) => setFormData((prev) => ({ ...prev, visibility: value as typeof prev.visibility }))}
@@ -170,62 +251,222 @@ export default function Page() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="private">Private</SelectItem>
-                                <SelectItem value="internal">Internal</SelectItem>
-                                <SelectItem value="public">Public</SelectItem>
+                                <SelectItem value="private">
+                                  <div className="flex items-center gap-2">
+                                    <Lock className="h-3 w-3" />
+                                    <span>Private</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="internal">
+                                  <div className="flex items-center gap-2">
+                                    <Eye className="h-3 w-3" />
+                                    <span>Internal</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="public">
+                                  <div className="flex items-center gap-2">
+                                    <Globe className="h-3 w-3" />
+                                    <span>Public</span>
+                                  </div>
+                                </SelectItem>
                               </SelectContent>
                             </Select>
+                            <p className="text-xs text-muted-foreground">
+                              {formData.visibility === "private" ? "Only organization members can view" :
+                               formData.visibility === "internal" ? "Visible to organization members" :
+                               formData.visibility === "public" ? "Visible to everyone" : ""}
+                            </p>
                           </div>
                         </div>
+
+                        {/* Project Name */}
                         <div className="space-y-2">
-                          <Label htmlFor="name">Project Name *</Label>
+                          <Label htmlFor="name" className="flex items-center gap-2">
+                            <GitBranch className="h-4 w-4 text-muted-foreground" />
+                            Project Name *
+                          </Label>
                           <Input
                             id="name"
                             value={formData.name}
                             onChange={(e) => handleNameChange(e.target.value)}
-                            placeholder="Enter project name"
+                            placeholder="My Awesome Project"
+                            className={formErrors.name ? "border-destructive" : ""}
                             required
                           />
+                          {formErrors.name && (
+                            <p className="text-sm text-destructive">{formErrors.name}</p>
+                          )}
                         </div>
+
+                        {/* Project Slug */}
                         <div className="space-y-2">
                           <Label htmlFor="slug">Project Slug</Label>
-                          <Input
-                            id="slug"
-                            value={formData.slug}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                            placeholder="project-slug"
-                          />
-                          <p className="text-sm text-muted-foreground">This will be used in the project URL</p>
+                          <div className="relative">
+                            <Input
+                              id="slug"
+                              value={formData.slug}
+                              onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
+                              placeholder="my-awesome-project"
+                              className="font-mono"
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            URL: <span className="font-mono">/dashboard/projects/{formData.slug || "project-slug"}</span>
+                          </p>
                         </div>
+
+                        {/* Description */}
                         <div className="space-y-2">
                           <Label htmlFor="description">Description</Label>
                           <Textarea
                             id="description"
                             value={formData.description}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                            placeholder="Enter project description"
+                            onChange={(e) => {
+                              const value = e.target.value.slice(0, 500)
+                              setFormData((prev) => ({ ...prev, description: value }))
+                            }}
+                            placeholder="A brief description of your project..."
                             rows={3}
+                            className="resize-none"
+                            maxLength={500}
                           />
+                          <p className={`text-xs ${formData.description.length >= 450 ? "text-amber-500" : "text-muted-foreground"}`}>
+                            {formData.description.length}/500 characters
+                          </p>
                         </div>
+
+                        {/* GitHub Repository */}
                         <div className="space-y-2">
-                          <Label htmlFor="github" className="flex items-center">
-                            <Github className="mr-2 h-4 w-4" />
+                          <Label htmlFor="github" className="flex items-center gap-2">
+                            <Github className="h-4 w-4 text-muted-foreground" />
                             GitHub Repository
+                            <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
                           </Label>
-                          <Input
-                            id="github"
-                            value={formData.github_repo_link}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, github_repo_link: e.target.value }))}
-                            placeholder="https://github.com/user/repo"
-                          />
+                          {userProfile?.github_username && repoMode === "select" ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setRepoMode("manual")}
+                                  className="text-xs"
+                                >
+                                  Enter URL manually
+                                </Button>
+                                <span className="text-xs text-muted-foreground">
+                                  Connected as <span className="font-medium">{userProfile.github_username}</span>
+                                </span>
+                              </div>
+                              {reposLoading ? (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Loading repositories...
+                                </div>
+                              ) : repoError ? (
+                                <div className="text-sm text-destructive py-2">{repoError}</div>
+                              ) : (
+                                <Select
+                                  value={formData.github_repo_link}
+                                  onValueChange={(value) => {
+                                    setFormData((prev) => ({ ...prev, github_repo_link: value }))
+                                    if (formErrors.github_repo_link) {
+                                      setFormErrors((prev) => ({ ...prev, github_repo_link: "" }))
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className={formErrors.github_repo_link ? "border-destructive" : ""}>
+                                    <SelectValue placeholder="Select a repository" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {userRepos.length === 0 ? (
+                                      <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                        No repositories found
+                                      </div>
+                                    ) : (
+                                      userRepos.map((repo: any) => (
+                                        <SelectItem key={repo.id} value={repo.html_url}>
+                                          <div className="flex items-center gap-2">
+                                            <Github className="h-3 w-3" />
+                                            <span>{repo.full_name}</span>
+                                            {repo.private && <Lock className="h-3 w-3 text-muted-foreground" />}
+                                          </div>
+                                        </SelectItem>
+                                      ))
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {userProfile?.github_username && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setRepoMode("select")
+                                    setReposLoading(true)
+                                    fetch(`/api/github/user-repos?username=${userProfile.github_username}`)
+                                      .then((res) => res.json())
+                                      .then((repos) => {
+                                        setUserRepos(repos)
+                                        setReposLoading(false)
+                                      })
+                                      .catch(() => {
+                                        setRepoError("Failed to fetch repositories")
+                                        setReposLoading(false)
+                                      })
+                                  }}
+                                  className="mb-2"
+                                >
+                                  <Github className="mr-2 h-3 w-3" />
+                                  Choose from your repositories
+                                </Button>
+                              )}
+                              <Input
+                                id="github"
+                                value={formData.github_repo_link}
+                                onChange={(e) => {
+                                  setFormData((prev) => ({ ...prev, github_repo_link: e.target.value }))
+                                  if (formErrors.github_repo_link) {
+                                    setFormErrors((prev) => ({ ...prev, github_repo_link: "" }))
+                                  }
+                                }}
+                                placeholder="https://github.com/username/repository"
+                                className={formErrors.github_repo_link ? "border-destructive" : ""}
+                              />
+                              {formErrors.github_repo_link && (
+                                <p className="text-sm text-destructive">{formErrors.github_repo_link}</p>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                      <DialogFooter className="border-t pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setIsCreateDialogOpen(false)
+                            setFormErrors({})
+                          }}
+                        >
                           Cancel
                         </Button>
-                        <Button type="submit" disabled={isCreating}>
-                          {isCreating ? "Creating..." : "Create Project"}
+                        <Button type="submit" disabled={isCreating || orgsLoading}>
+                          {isCreating ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Creating...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="mr-2 h-4 w-4" />
+                              Create Project
+                            </>
+                          )}
                         </Button>
                       </DialogFooter>
                     </form>
@@ -238,11 +479,11 @@ export default function Page() {
 
         {/* Stats Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-blue-50/50 dark:to-blue-900/20 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border shadow-lg bg-card/50 backdrop-blur-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Active Projects</CardTitle>
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                <GitBranch className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg group-hover:scale-110 transition-transform">
+                <GitBranch className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
             <CardContent>
@@ -258,11 +499,11 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-green-50/50 dark:to-green-900/20 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border shadow-lg bg-card/50 backdrop-blur-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Team Members</CardTitle>
-              <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
-                <Users className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg group-hover:scale-110 transition-transform">
+                <Users className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
             <CardContent>
@@ -274,11 +515,11 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-emerald-50/50 dark:to-emerald-900/20 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border shadow-lg bg-card/50 backdrop-blur-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Completed Tasks</CardTitle>
-              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-2 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg shadow-lg group-hover:scale-110 transition-transform">
+                <CheckCircle className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
             <CardContent>
@@ -294,11 +535,11 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-card to-orange-50/50 dark:to-orange-900/20 hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden border shadow-lg bg-card/50 backdrop-blur-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Pending Tasks</CardTitle>
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/50 rounded-lg">
-                <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+              <div className="p-2 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg group-hover:scale-110 transition-transform">
+                <Clock className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
             <CardContent>
@@ -317,7 +558,7 @@ export default function Page() {
 
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Recent Projects */}
-          <Card className="lg:col-span-2 border-0 shadow-lg bg-card/80 backdrop-blur-sm">
+          <Card className="lg:col-span-2 border shadow-lg bg-card/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -401,7 +642,7 @@ export default function Page() {
           </Card>
 
           {/* Recent Tasks */}
-          <Card className="border-0 shadow-lg bg-card/80 backdrop-blur-sm">
+          <Card className="border shadow-lg bg-card/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl font-semibold">Recent Tasks</CardTitle>
               <CardDescription>Your latest task updates</CardDescription>
@@ -476,6 +717,5 @@ export default function Page() {
           </Card>
         </div>
       </div>
-    </SidebarInset >
   )
 }

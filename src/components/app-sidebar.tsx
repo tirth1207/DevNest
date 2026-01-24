@@ -31,6 +31,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useSidebarData } from "@/hooks/use-sidebar-data"
+import Link from "next/link"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user, organizations, projects, currentOrg, loading, error, switchOrganization } = useSidebarData()
@@ -131,15 +132,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+              <Link href="/dashboard">
+                <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg shadow-lg">
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">DevNest</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate text-xs text-muted-foreground">Enterprise</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

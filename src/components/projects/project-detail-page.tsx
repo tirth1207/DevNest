@@ -49,12 +49,13 @@ export function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
       setCommitsError(null)
       setCommits([])
       try {
-        const github = repoUrl.replace("https://github.com/", "")
-        const url = `https://api.github.com/repos/${github}/commits`
-        const res = await fetch(url, {
-          headers: { Accept: "application/vnd.github.v3+json" },
-        })
-        if (!res.ok) throw new Error(`Failed to fetch commits: ${res.statusText}`)
+        const github = repoUrl.replace("https://github.com/", "").replace(/\/$/, "")
+        // Use authenticated API route to support private repositories
+        const res = await fetch(`/api/github/commits?repo=${encodeURIComponent(github)}&per_page=30`)
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: res.statusText }))
+          throw new Error(errorData.error || `Failed to fetch commits: ${res.statusText}`)
+        }
         const data = await res.json()
         setCommits(data)
       } catch (e: any) {
@@ -213,7 +214,7 @@ export function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
               <TabsTrigger value="tasks">Tasks</TabsTrigger>
               <TabsTrigger value="members">Members</TabsTrigger>
               <TabsTrigger value="commits">Commits</TabsTrigger>
-              <TabsTrigger value="calander">Calendar</TabsTrigger>
+              <TabsTrigger value="calendar">Calendar</TabsTrigger>
               {canEdit && <TabsTrigger value="settings">Settings</TabsTrigger>}
             </TabsList>
 
@@ -378,14 +379,12 @@ export function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
               />
             </TabsContent>
 
-            <TabsContent value="calander">
-              <div className="">
-                <ProjectCalendarTab projectId={project.id} />
-              </div>
+            <TabsContent value="calendar">
+              <ProjectCalendarTab projectId={project.id} />
             </TabsContent>
 
             <TabsContent value="commits">
-              <ProjectCommitsTab commits={commits} />
+              <ProjectCommitsTab commits={commits} repoUrl={githubRepoUrl} />
             </TabsContent>
 
             {canEdit && (
