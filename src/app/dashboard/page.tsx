@@ -162,7 +162,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex-1 space-y-8">
+    <div className="flex-1 space-y-8 ">
       {/* Header with gradient background */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white shadow-xl">
         <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />

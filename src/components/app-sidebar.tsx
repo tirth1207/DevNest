@@ -14,6 +14,8 @@ import {
   SquareTerminal,
   Building2,
   FolderOpen,
+  CheckCircle,
+  Calendar as CalendarIcon,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -29,6 +31,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar"
 import { useSidebarData } from "@/hooks/use-sidebar-data"
 import Link from "next/link"
@@ -54,39 +58,64 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = React.useMemo(() => {
     return [
       {
-        title: "Platform",
+        title: "Dashboard",
         url: "/dashboard",
         icon: SquareTerminal,
         isActive: true,
+      },
+      {
+        title: "Organizations",
+        url: "/dashboard/organizations",
+        icon: Building2,
         items: [
           {
-            title: "Organizations",
+            title: "All Organizations",
             url: "/dashboard/organizations",
           },
           {
-            title: "Projects",
-            url: "/dashboard/projects",
+            title: "Create Organization",
+            url: "/dashboard/organizations/new",
           },
         ],
       },
       {
-        title: "Models",
-        url: "#",
-        icon: Bot,
+        title: "Projects",
+        url: "/dashboard/projects",
+        icon: FolderOpen,
         items: [
           {
-            title: "Genesis",
-            url: "#",
+            title: "All Projects",
+            url: "/dashboard/projects",
           },
           {
-            title: "Explorer",
-            url: "#",
-          },
-          {
-            title: "Quantum",
-            url: "#",
+            title: "Create Project",
+            url: "/dashboard/projects/new",
           },
         ],
+      },
+      {
+        title: "Tasks",
+        url: "/dashboard/tasks",
+        icon: CheckCircle,
+        items: [
+          {
+            title: "My Tasks",
+            url: "/dashboard/tasks",
+          },
+          {
+            title: "Assigned to Me",
+            url: "/dashboard/tasks?filter=assigned",
+          },
+          {
+            title: "Overdue",
+            url: "/dashboard/tasks?filter=overdue",
+          },
+        ],
+      },
+      {
+        title: "Calendar",
+        url: "/dashboard/calendar",
+        icon: CalendarIcon,
       },
     ]
   }, [])
@@ -133,12 +162,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg shadow-lg">
+                <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white flex aspect-square size-8 items-center justify-center rounded-lg shadow-lg">
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">DevNest</span>
-                  <span className="truncate text-xs text-muted-foreground">Enterprise</span>
+                  <span className="truncate font-semibold">DevNest</span>
+                  <span className="truncate text-xs text-muted-foreground">Project Management</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -148,7 +177,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={navMain} />
         <NavProjects projects={projectsData} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupLabel>Resources</SidebarGroupLabel>
+          <NavSecondary items={navSecondary} />
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

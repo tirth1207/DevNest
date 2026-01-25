@@ -27,12 +27,12 @@ export async function GET(request: Request) {
 
   const token = (process.env.GITHUB_PAT || "").trim()
 
-  console.log(`[GitHub API] Requesting commits: ${owner}/${repo}`, {
-    branch,
-    tokenPresent: !!token,
-    tokenLength: token.length,
-    tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
-  })
+  // console.log(`[GitHub API] Requesting commits: ${owner}/${repo}`, {
+  //   branch,
+  //   tokenPresent: !!token,
+  //   tokenLength: token.length,
+  //   tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
+  // })
 
   try {
     const octokit = new Octokit({
@@ -55,11 +55,11 @@ export async function GET(request: Request) {
       headers: { "Content-Type": "application/json" },
     })
   } catch (error: any) {
-    console.error(`[GitHub API] Commits Error:`, {
-      status: error.status,
-      message: error.message,
-      documentation_url: error.response?.data?.documentation_url
-    })
+    // console.error(`[GitHub API] Commits Error:`, {
+    //   status: error.status,
+    //   message: error.message,
+    //   documentation_url: error.response?.data?.documentation_url
+    // })
 
     // If status is 404 and we have a token, it might mean the token lacks permissions
     const errorMessage = error.status === 404

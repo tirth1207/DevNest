@@ -14,9 +14,9 @@ export async function GET(request: Request) {
     })
   }
 
-  console.log(`[GitHub API] Fetching repos for user: ${username}`, {
-    hasToken: !!process.env.GITHUB_PAT
-  })
+  // console.log(`[GitHub API] Fetching repos for user: ${username}`, {
+  //   hasToken: !!process.env.GITHUB_PAT
+  // })
 
   try {
     const octokit = new Octokit({

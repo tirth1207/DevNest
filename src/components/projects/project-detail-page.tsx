@@ -379,7 +379,7 @@ export function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
               />
             </TabsContent>
 
-            <TabsContent value="calendar">
+            <TabsContent value="calendar" className="max-w-5xl">
               <ProjectCalendarTab projectId={project.id} />
             </TabsContent>
 

@@ -25,11 +25,11 @@ export async function GET(request: Request) {
 
   const token = (process.env.GITHUB_PAT || "").trim()
 
-  console.log(`[GitHub API] Requesting branches: ${owner}/${repo}`, {
-    tokenPresent: !!token,
-    tokenLength: token.length,
-    tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
-  })
+  // console.log(`[GitHub API] Requesting branches: ${owner}/${repo}`, {
+  //   tokenPresent: !!token,
+  //   tokenLength: token.length,
+  //   tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
+  // })
 
   try {
     const octokit = new Octokit({
@@ -50,11 +50,11 @@ export async function GET(request: Request) {
       headers: { "Content-Type": "application/json" },
     })
   } catch (error: any) {
-    console.error(`[GitHub API] Branches Error:`, {
-      status: error.status,
-      message: error.message,
-      documentation_url: error.response?.data?.documentation_url
-    })
+    // console.error(`[GitHub API] Branches Error:`, {
+    //   status: error.status,
+    //   message: error.message,
+    //   documentation_url: error.response?.data?.documentation_url
+    // })
 
     const errorMessage = error.status === 404
       ? "Repository not found. For private repos, ensure your GITHUB_PAT has 'repo' scope."
